@@ -18,4 +18,4 @@ class Settings(BaseSettings):
     log_level: str | None = os.getenv("LOG_LEVEL") or "INFO"
 
 
-settings = Settings()
+app_settings = Settings()
