@@ -1,22 +1,19 @@
 from typing import Literal
 from pydantic import BaseModel
-from config.settings import settings
+from config.settings import app_settings
 from openai import AsyncOpenAI
 from visibility.logging import logger
 import json
+from tenacity import retry, stop_after_attempt, wait_exponential
 
 
 class Message(BaseModel):
-    role: Literal["user", "assistant"]
+    role: Literal["user", "system", "assistant"]
     content: str
 
 
-class Conversation(BaseModel):
-    messages: list[Message] | None = []
-
-
 class LLM_Hyperparameters(BaseModel):
-    model: str = settings.llm_model_name
+    model: str = app_settings.llm_model_name
     temperature: float = 0.3
     max_tokens: int = 4096
     top_p: float = 1.0
@@ -25,9 +22,9 @@ class LLM_Hyperparameters(BaseModel):
 
 
 class LLM_API_Config(BaseModel):
-    base_url: str = settings.llm_api_base_url
-    api_key: str = settings.llm_api_key
-    base_model: str = settings.llm_model_name
+    base_url: str = app_settings.llm_api_base_url
+    api_key: str = app_settings.llm_api_key
+    base_model: str = app_settings.llm_model_name
 
 
 class LLM_Service:
@@ -43,22 +40,16 @@ class LLM_Service:
         )
         self.hyperparameters: LLM_Hyperparameters = llm_hyperparameters
 
-    @property
-    def hyperparameters(self):
-        return self._hyperparameters
-
-    @property
-    def llm_api_client(self):
-        return self._llm_api_client
-
-    async def query(self, message: str, json_mode: bool = False):
+    @retry(
+        stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=15)
+    )
+    async def query(self, messages: list[Message], json_mode: bool = False):
         try:
-            message = Message(role="user", content=message)
-            logger.debug("Querying LLM with user message: {}", message.content)
+            logger.debug("Querying LLM with latest message: {}", messages[-1])
             if json_mode:
                 response = await self.llm_api_client.chat.completions.create(
                     model=self.hyperparameters.model,
-                    messages=self.get_messages(),
+                    messages=messages,
                     temperature=self.hyperparameters.temperature,
                     max_tokens=self.hyperparameters.max_tokens,
                     top_p=self.hyperparameters.top_p,
@@ -66,21 +57,22 @@ class LLM_Service:
                     presence_penalty=self.hyperparameters.presence_penalty,
                     response_format={"type": "json_object"},
                 )
-                response_json = json.loads(response.choices[0].message)
+                response_json = json.loads(response.choices[0].message.content)
                 logger.debug("LLM JSON response: {}", response_json)
                 return response_json
             else:
-                response = await self.llm_api_client.chat.completions.create(
+                llm_response = await self.llm_api_client.chat.completions.create(
                     model=self.hyperparameters.model,
-                    messages=self.get_messages(),
+                    messages=messages,
                     temperature=self.hyperparameters.temperature,
                     max_tokens=self.hyperparameters.max_tokens,
                     top_p=self.hyperparameters.top_p,
                     frequency_penalty=self.hyperparameters.frequency_penalty,
                     presence_penalty=self.hyperparameters.presence_penalty,
                 )
-            logger.debug("LLM response: {}", response.choices[0].message.content)
-            return response.choices[0].message.content
+            response = llm_response.choices[0].message.content
+            logger.debug("LLM response: {}", response)
+            return response
         except Exception as e:
             logger.exception(f"Error querying LLM: {e}")
             raise e
