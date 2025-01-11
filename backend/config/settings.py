@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     postgres_db_password: str | None = os.getenv("POSTGRES_DB_PASSWORD")
     postgres_db_host: str | None = os.getenv("POSTGRES_DB_HOST")
     postgres_db_port: str | None = os.getenv("POSTGRES_DB_PORT")
-    log_level: str | None = os.getenv("LOG_LEVEL")
+    log_level: str | None = os.getenv("LOG_LEVEL") or "INFO"
 
 
 settings = Settings()
