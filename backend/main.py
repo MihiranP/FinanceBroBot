@@ -4,6 +4,7 @@ from fastapi.responses import JSONResponse
 from visibility.logging import logger
 from data.database import db
 from data.schema import UserTable, UserProfile, Podcasts, LessonPlans
+from api.llm import router as llm_router
 
 app = FastAPI(
     title="FinanceBroBot",
@@ -18,6 +19,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(llm_router)
 
 
 @app.exception_handler(Exception)

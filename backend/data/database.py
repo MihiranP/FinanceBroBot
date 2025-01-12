@@ -4,16 +4,16 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
 from typing import Any
-from config.settings import settings
 from visibility.logging import logger
+from config.settings import app_settings
 
 
 class Database(BaseModel):
-    user: str = settings.postgres_db_user
-    password: str = settings.postgres_db_password
-    host: str = settings.postgres_db_host
-    port: str = settings.postgres_db_port
-    name: str = settings.postgres_db_name
+    user: str = app_settings.postgres_db_user
+    password: str = app_settings.postgres_db_password
+    host: str = app_settings.postgres_db_host
+    port: str = app_settings.postgres_db_port
+    name: str = app_settings.postgres_db_name
     engine: SkipValidation[Engine] | None = None
     SessionLocal: SkipValidation[sessionmaker] | None = None
     Base: Any = declarative_base()
