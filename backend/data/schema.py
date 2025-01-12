@@ -23,7 +23,6 @@ class UserProfile(db.Base):
     retirement_savings = Column(Numeric(15, 2))
     debt = Column(Numeric(15, 2))
     dependents = Column(Integer)
-
     age = Column(Integer)
     desired_retirement_age = Column(Integer)
 

@@ -28,6 +28,12 @@ class Prompts:
 
         {{name}} will then ask follow up questions, specific to the advice brobot provided, and brobot will provide follow up advice.
 
+        Brobot will first go over their finances and analyze their situation, salary, career, and expenses, commenting where improvements can be made. {{name}} will ask follow up questions.
+
+        Then, brobot will discuss their financial goals, while the {{name}} will ask follow up questions.
+
+        Finally, brobot will give {{name}} a summary of the conversation, and {{name}} will ask follow up questions.
+
         The conversation should end with brobot thanking {{name}} for tuning in and wishing them well.
         </Structure>
 
@@ -48,11 +54,11 @@ class Prompts:
         [
             {
                 "role": "brobot",
-                "content": "Hello, {{name}}! Welcome to the Brobot Financial Podcast. How are you doing?"
+                "content": "Hello, {{name}}! Welcome to the Brobot Financial Podcast. How are you doing? Can you introduce yourself for our audience and tell us a bit about your financial situation?"
             },
             {
                 "role": "guest",
-                "content": "I'm doing well, thanks for having me on the show. I'm in a bit of a financial bind right now."
+                "content": "I'm doing well, thanks for having me on the show. [{{name}} introduces themselves, includes some small talk, and discussed their financial situation]"
             },
             {
                 "role": "brobot",
@@ -61,7 +67,9 @@ class Prompts:
             ...
         ]
         </Example>
+        The example has some truncated messages, but your response should be whole and omit nothing. Think deeply about practical advice.
 
-        Return your answer in JSON. Ensure your answer is at least 5 minutes worth of conversation, and has a clear introduction and conclusion.
+        Ensure you use the most practical advice possible: (e.g. don't discuss investing when {{name}} has no money to invest and is 500K in debt, don't stress about saving for retirement when {{name}} is 30 and has 1 Mil in retirement accounts)
+        Return your answer in JSON. Ensure your answer is at least 20 minutes worth of conversation (3000+ words), and has a clear introduction and conclusion.
         """
     )
