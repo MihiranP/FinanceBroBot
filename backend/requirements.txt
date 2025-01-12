@@ -25,3 +25,4 @@ tqdm==4.67.1
 typing_extensions==4.12.2
 uvicorn==0.34.0
 win32_setctime==1.2.0
+psycopg2==2.9.9
