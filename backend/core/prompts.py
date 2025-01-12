@@ -21,13 +21,13 @@ class Prompts:
         The conversation should be structured as a back and forth exchange between {{name}} and brobot.
 
         The conversation will start with brobot welcoming {{name}} to the show and asking them how they're doing.
-        
+
         {{name}} introducing themselves and their situation, asking for specific advice on their situation.
 
         brobot will then provide advice on {{name}}'s situation, starting with the most important advice first.
 
         {{name}} will then ask follow up questions, specific to the advice brobot provided, and brobot will provide follow up advice.
-        
+
         The conversation should end with brobot thanking {{name}} for tuning in and wishing them well.
         </Structure>
 
@@ -58,7 +58,7 @@ class Prompts:
                 "role": "brobot",
                 "content": "I'm sorry to hear that. What's going on?"
             }
-            ... 
+            ...
         ]
         </Example>
 
