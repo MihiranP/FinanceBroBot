@@ -5,6 +5,8 @@ from visibility.logging import logger
 from data.database import db
 from data.schema import UserTable, UserProfile, Podcasts, LessonPlans
 from api.llm import router as llm_router
+from api.podcast import router as podcast_router
+from api.lesson import router as lesson_router
 
 app = FastAPI(
     title="FinanceBroBot",
@@ -21,6 +23,8 @@ app.add_middleware(
 )
 
 app.include_router(llm_router)
+app.include_router(podcast_router)
+app.include_router(lesson_router)
 
 
 @app.exception_handler(Exception)
