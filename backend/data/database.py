@@ -1,39 +1,44 @@
 from pydantic import BaseModel, computed_field, SkipValidation
-from sqlalchemy import Engine, create_engine
+from sqlalchemy import Engine, create_engine, inspect
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.exc import SQLAlchemyError
 from typing import Any
-from config.settings import Settings
+from config.settings import settings
+from visibility.logging import logger
 
 
 class Database(BaseModel):
-    user: str = Settings.postgres_db_user
-    password: str = Settings.postgres_db_password
-    host: str = Settings.postgres_db_host
-    port: str = Settings.postgres_db_port
-    name: str = Settings.postgres_db_name
+    user: str = settings.postgres_db_user
+    password: str = settings.postgres_db_password
+    host: str = settings.postgres_db_host
+    port: str = settings.postgres_db_port
+    name: str = settings.postgres_db_name
     engine: SkipValidation[Engine] | None = None
     SessionLocal: SkipValidation[sessionmaker] | None = None
     Base: Any = declarative_base()
 
     @computed_field
     def url(self) -> str:
-        return f"postgresql://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}"
+        return f"postgresql://{self.user}:{self.password}@{self.host}:{self.port}/{self.name}"
 
-    def connect(self) -> None:
+    class Config:
+        arbitrary_types_allowed = True
+
+    def connect(self):
         try:
             self.engine = create_engine(self.url)
             self.SessionLocal = sessionmaker(
                 autocommit=False, autoflush=False, bind=self.engine
             )
+            logger.info("database connection successful")
         except SQLAlchemyError as e:
-            # TODO: Add logging bruv
+            logger.error(f"An error occurred while connecting to the database: {e}")
             raise e
 
     def close(self):
         self.SessionLocal().close()
-        # app_logger.debug("database session closed.")
+        logger.debug("database session closed.")
 
     def get_db(self):
         db = self.SessionLocal()
@@ -44,14 +49,38 @@ class Database(BaseModel):
 
     def create_tables(self):
         try:
+            logger.info(f"Attempting to connect to database: {self.name}")
             self.connect()
+
+            if self.engine is None:
+                logger.error("Database engine is None - connection failed")
+                return
+
+            # Get list of all tables before creation
+            inspector = inspect(self.engine)
+            existing_tables = inspector.get_table_names()
+            logger.info(f"Existing tables before creation: {existing_tables}")
+
+            # Create tables
             self.Base.metadata.create_all(self.engine)
-        # TODO: set up logging
-        #     app_logger.debug("Tables created successfully")
-        # except SQLAlchemyError as e:
-        #     app_logger.error(f"An error occurred while creating tables: {e}")
+
+            # Check what tables should have been created
+            tables_to_create = [
+                table.name for table in self.Base.metadata.sorted_tables
+            ]
+            logger.info(f"Tables that should be created: {tables_to_create}")
+
+            # Verify tables after creation
+            inspector = inspect(self.engine)
+            tables_after = inspector.get_table_names()
+            logger.info(f"Tables after creation: {tables_after}")
+
+        except SQLAlchemyError as e:
+            logger.error(f"An error occurred while creating tables: {e}")
+            raise
         finally:
-            self.engine.dispose()
+            if self.engine is not None:
+                self.engine.dispose()
 
 
 db = Database()

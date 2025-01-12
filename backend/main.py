@@ -2,6 +2,8 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from visibility.logging import logger
+from data.database import db
+from data.schema import UserTable, UserProfile, Podcasts, LessonPlans
 
 app = FastAPI(
     title="FinanceBroBot",
@@ -38,6 +40,14 @@ async def health_check():
     """Health check endpoint"""
     logger.debug("Health check endpoint accessed")
     return {"status": "healthy"}
+
+
+@app.get("/db/create")
+async def create_db():
+    """Create database tables"""
+    logger.info("Creating database tables")
+    db.create_tables()
+    return {"status": "ok", "message": "Database tables created successfully"}
 
 
 if __name__ == "__main__":
