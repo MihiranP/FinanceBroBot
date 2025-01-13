@@ -3,6 +3,8 @@ from core.user import UserFinancialProfile
 from core.llm import LLM_Service, Message, LLM_API_Config
 from visibility.logging import logger
 from pydantic import BaseModel
+from data.schema import Podcasts, UserProfile
+from sqlalchemy.exc import SQLAlchemyError
 
 
 class PodcastMessage(BaseModel):
@@ -50,3 +52,31 @@ class PodcastService:
         Generate audio for a podcast.
         """
         pass
+
+    async def save_podcast(self, transcript: str, user_profile_id: int, db):
+        """
+        Save the podcast to the database.
+        """
+        to_save = Podcasts(user_profile_id=user_profile_id, transcript=transcript)
+        user = (
+            db.query(UserProfile)
+            .filter(UserProfile.profile_id == user_profile_id)
+            .first()
+        )
+        if not user:
+            logger.error(
+                "No user with associated user_id when creating podcast??? Manav what did you do?"
+            )
+        try:
+            db.add(to_save)
+            db.commit()
+            db.refresh(to_save)
+            return {
+                "status": "success",
+                "podcast_id": to_save.podcast_id,
+                "user_profile_id": to_save.user_profile_id,
+            }
+        except SQLAlchemyError as e:
+            db.rollback()
+            logger.error(f"An error occurred while saving podcast to the database: {e}")
+            raise e

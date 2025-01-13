@@ -41,11 +41,15 @@ class Database(BaseModel):
         logger.debug("database session closed.")
 
     def get_db(self):
+        if self.SessionLocal is None:
+            self.connect()
+
         db = self.SessionLocal()
         try:
             yield db
         finally:
             db.close()
+            logger.debug("Database session closed")
 
     def create_tables(self):
         try:

@@ -3,6 +3,8 @@ from core.user import UserFinancialProfile
 from core.llm import LLM_Service, Message, LLM_API_Config
 from visibility.logging import logger
 from pydantic import BaseModel
+from data.schema import LessonPlans, UserProfile
+from sqlalchemy.exc import SQLAlchemyError
 
 
 class LessonSections(BaseModel):
@@ -40,4 +42,32 @@ class LessonService:
             return LessonResponse(plan=response)
         except Exception as e:
             logger.exception(f"An error occurred while generating lesson: {e}")
+            raise e
+
+    async def save_lesson(self, transcript: str, user_profile_id: int, db):
+        """
+        Save lessons to the db
+        """
+        to_save = LessonPlans(user_profile_id=user_profile_id, transcript=transcript)
+        user = (
+            db.query(UserProfile)
+            .filter(UserProfile.profile_id == user_profile_id)
+            .first()
+        )
+        if not user:
+            logger.error(
+                "No user with associated user_id when creating lesson??? Manav what did you do?"
+            )
+        try:
+            db.add(to_save)
+            db.commit()
+            db.refresh(to_save)
+            return {
+                "status": "success",
+                "lesson_plan_id": to_save.lesson_plan_id,
+                "user_profile_id": to_save.user_profile_id,
+            }
+        except SQLAlchemyError as e:
+            db.rollback()
+            logger.error(f"An error occurred while saving lesson to the database: {e}")
             raise e
