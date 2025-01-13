@@ -9,13 +9,13 @@ DB = Annotated[db.SessionLocal, Depends(db.get_db)]
 
 
 @router.post("/lesson", response_model=LessonResponse)
-async def generate_podcast(context: UserFinancialProfile):
+async def generate_lesson(context: UserFinancialProfile):
     lesson_service = LessonService()
     return await lesson_service.generate_lesson(context)
 
 
 @router.put("/save/lesson")
-async def save_podcast(transcript: str, user_profile_id: int, db: DB):
+async def save_lesson(transcript: str, user_profile_id: int, db: DB):
     Lesson_service = LessonService()
     try:
         return await Lesson_service.save_lesson(transcript, user_profile_id, db)
