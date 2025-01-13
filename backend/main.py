@@ -7,6 +7,7 @@ from data.schema import UserTable, UserProfile, Podcasts, LessonPlans
 from api.llm import router as llm_router
 from api.podcast import router as podcast_router
 from api.lesson import router as lesson_router
+from api.user import router as usersrouter
 
 app = FastAPI(
     title="FinanceBroBot",
@@ -25,6 +26,7 @@ app.add_middleware(
 app.include_router(llm_router)
 app.include_router(podcast_router)
 app.include_router(lesson_router)
+app.include_router(usersrouter)
 
 
 @app.exception_handler(Exception)

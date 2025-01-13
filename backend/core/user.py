@@ -1,4 +1,37 @@
 from pydantic import BaseModel
+from pypdf import PdfReader
+from data.schema import UserTable, UserProfile
+from visibility.logging import logger
+from sqlalchemy.exc import SQLAlchemyError
+
+
+class User(BaseModel):
+    """
+    A class that represents a user.
+    """
+
+    user_id: int | None = None
+    username: str | None = None
+    password: str | None = None
+
+    async def save_user_to_db(self, db):
+        """
+        Save the user to the database.
+        """
+        try:
+            new_user = UserTable(username=self.username, password_hash=self.password)
+            db.add(new_user)
+            db.commit()
+            db.refresh(new_user)
+            return {
+                "status": "success",
+                "user_id": new_user.user_id,
+                "username": new_user.username,
+            }
+        except SQLAlchemyError as e:
+            db.rollback()
+            logger.error(f"An error occurred while saving user to the database: {e}")
+            raise e
 
 
 class UserFinancialProfile(BaseModel):
@@ -20,6 +53,32 @@ class UserFinancialProfile(BaseModel):
     investment_experience: str | None = None
     credit_statement: str | None = None
 
+    async def save_user_profile(self, validated_profile, user_id, db):
+        """
+        Save the user's financial profile to the database.
+        """
+        to_save = UserProfile(**validated_profile)
+        user = db.query(UserTable).filter(UserTable.user_id == user_id).first()
+        if not user:
+            logger.error(
+                "No user with associated user_id when creating profile??? Manav what did you do?"
+            )
+        try:
+            to_save.user_id = user_id
+            db.add(to_save)
+            db.commit()
+            db.refresh(to_save)
+            return {
+                "status": "success",
+                "profile_id": to_save.profile_id,
+                "user_id": to_save.user_id,
+            }
+        except SQLAlchemyError as e:
+            db.rollback()
+            logger.error(
+                f"An error occurred while saving user profile to the database: {e}"
+            )
+
     def convert_to_prompt_string(self) -> str:
         """
         Convert the user's financial profile to a prompt string.
@@ -40,3 +99,11 @@ class UserFinancialProfile(BaseModel):
         Credit Statement: {self.credit_statement}
         """
         return prompt_string
+
+    def parse_statement(pdf_path: str) -> str:
+        """
+        Parse a credit statement PDF and return the text.
+        """
+        reader = PdfReader(pdf_path)
+        text = reader.get_text()
+        return text
