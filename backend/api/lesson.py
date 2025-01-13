@@ -14,7 +14,7 @@ async def generate_lesson(context: UserFinancialProfile):
     return await lesson_service.generate_lesson(context)
 
 
-@router.put("/save/lesson")
+@router.put("/lesson")
 async def save_lesson(transcript: str, user_profile_id: int, db: DB):
     Lesson_service = LessonService()
     try:

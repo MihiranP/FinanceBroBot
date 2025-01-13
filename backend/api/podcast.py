@@ -14,7 +14,7 @@ async def generate_podcast(context: UserFinancialProfile):
     return await podcast_service.generate_podcast(context)
 
 
-@router.put("/save/podcast")
+@router.put("/podcast")
 async def save_podcast(transcript: str, user_profile_id: int, db: DB):
     podcast_service = PodcastService()
     try:

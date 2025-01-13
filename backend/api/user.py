@@ -61,7 +61,7 @@ class UserFullResponse(BaseModel):
         from_attributes = True
 
 
-@router.put("/save/user")
+@router.put("/user")
 async def save_user(username: str, password: str, db: DB):
     user = User(username=username, password=password)
     try:
@@ -70,7 +70,7 @@ async def save_user(username: str, password: str, db: DB):
         return {"status": "error", "message": f"An error occurred: {e}"}
 
 
-@router.put("/save/profile")
+@router.put("/profile")
 async def save_user_profile(userprofile: UserFinancialProfile, user_id: int, db: DB):
     try:
         ufp = UserFinancialProfile()
