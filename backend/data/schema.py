@@ -1,6 +1,7 @@
 from data.database import db
 from sqlalchemy import Column, ForeignKey, Integer, LargeBinary, Numeric, String, JSON
 from sqlalchemy.orm import relationship
+from pgvector.sqlalchemy import Vector
 
 
 class UserTable(db.Base):
@@ -58,3 +59,10 @@ class LessonPlans(db.Base):
     user_profile_id = Column(Integer, ForeignKey("user_profiles.profile_id"))
     user_profile = relationship("UserProfile", back_populates="lessons")
     transcript = Column("transcript", String)
+
+
+class Embeddings(db.Base):
+    __tablename__ = "embeddings"
+    embedding_id = Column(Integer, primary_key=True, autoincrement=True)
+    content = Column("content", String)
+    embedding = Column(Vector(4096))
