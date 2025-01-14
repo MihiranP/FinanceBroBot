@@ -131,3 +131,14 @@ class Prompts:
         Ensure you use the most practical advice possible: (e.g. don't discuss investing when {{name}} has no money to invest and is 500K in debt, don't stress about saving for retirement when {{name}} is 30 and has 1 Mil in retirement accounts)
         """
     )
+
+    RAG_CONTEXT_PROMPT = dedent(
+        """
+        <Useful Information Pulled From RAG about similar situations>
+        Here are some similar financial situations to {{name}}'s situation, and useful answers to similar questions:
+        {{context}}
+        </Useful Information Pulled From RAG about similar situations>
+
+        USER MESSAGE BEGINS NOW (THE ABOVE INFORMATION IS ONLY FOR CONTEXT, NOT TO BE USED IN THE RESPONSE):
+        """
+    )

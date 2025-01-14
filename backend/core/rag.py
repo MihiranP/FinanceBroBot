@@ -91,3 +91,23 @@ class RAG_Service:
                 self.db.rollback()
             logger.error(f"Error embedding dataframe: {e}")
             raise e
+
+    async def get_top_k_embeddings(self, query: str, k: int = 5) -> list[str]:
+        if self.db is None:
+            raise ValueError("Database session is not initialized")
+
+        try:
+            query_embedding = await self.embed_set(query)
+            results = (
+                self.db.query(DB_Embeddings)
+                .order_by(
+                    DB_Embeddings.embedding.l2_distance(query_embedding.embedding)
+                )
+                .limit(k)
+                .all()
+            )
+            results = [result.content for result in results]
+            return results
+        except Exception as e:
+            logger.error(f"Error getting top-k embeddings: {e}")
+            raise e

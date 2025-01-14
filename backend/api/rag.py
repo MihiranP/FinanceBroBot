@@ -13,6 +13,11 @@ class EmbedRequest(BaseModel):
     data_path: str
 
 
+class TopKRequest(BaseModel):
+    query: str
+    k: int = 5
+
+
 @router.post("/embed")
 async def embed_df(request: EmbedRequest, db: DB):
     try:
@@ -27,6 +32,19 @@ async def embed_df(request: EmbedRequest, db: DB):
         return result
     except Exception as e:
         logger.error(f"Error embedding dataframe: {e}")
+        if db is not None:
+            db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/topk")
+async def get_top_k_embeddings(request: TopKRequest, db: DB):
+    try:
+        rag_service = RAG_Service(db)
+        result = await rag_service.get_top_k_embeddings(request.query, request.k)
+        return result
+    except Exception as e:
+        logger.error(f"Error getting top-k embeddings: {e}")
         if db is not None:
             db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
