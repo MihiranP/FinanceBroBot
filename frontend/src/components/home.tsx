@@ -4,6 +4,7 @@ import AccountsGrid from "./dashboard/AccountsGrid";
 import AIChatSidebar from "./dashboard/AIChatSidebar";
 import EducationSection from "./dashboard/EducationSection";
 import StatementsSection from "./dashboard/StatementsSection";
+import AuthPage from "./dashboard/AuthPage";
 
 interface HomeProps {
   isAIChatExpanded?: boolean;
@@ -15,7 +16,6 @@ const Home = ({
   onAIChatToggle = () => {},
 }: HomeProps) => {
   const [hasGeneratedAudio, setHasGeneratedAudio] = React.useState(false);
-
   return (
     <div className="min-h-screen bg-background relative">
       {/* Main Content Area */}
@@ -23,8 +23,8 @@ const Home = ({
         <div
           className={`transition-all duration-300 ${
             isAIChatExpanded ? "mr-[380px]" : "mr-[50px]"
-          }`}
-        >
+            }`}
+            >
           {/* Main Grid Layout */}
           <div className="space-y-8">
             {/* Audio Player */}
@@ -32,7 +32,7 @@ const Home = ({
               <AudioPlayer
                 hasGeneratedAudio={hasGeneratedAudio}
                 onGenerateAudio={() => setHasGeneratedAudio(true)}
-              />
+                />
             </section>
 
             {/* Accounts Section */}
