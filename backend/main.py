@@ -8,6 +8,7 @@ from api.llm import router as llm_router
 from api.podcast import router as podcast_router
 from api.lesson import router as lesson_router
 from api.user import router as usersrouter
+from api.rag import router as rag_router
 
 app = FastAPI(
     title="FinanceBroBot",
@@ -27,6 +28,7 @@ app.include_router(llm_router)
 app.include_router(podcast_router)
 app.include_router(lesson_router)
 app.include_router(usersrouter)
+app.include_router(rag_router)
 
 
 @app.exception_handler(Exception)

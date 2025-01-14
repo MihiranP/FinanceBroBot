@@ -1,7 +1,8 @@
 from pydantic import BaseModel
 from config.settings import app_settings
+from data.schema import Embeddings as DB_Embeddings
 from visibility.logging import logger
-from llm import LLM_Service, LLM_API_Config
+from core.llm import LLM_Service, LLM_API_Config
 import pandas as pd
 
 
@@ -11,7 +12,7 @@ class RAGSettings(BaseModel):
 
 class Embedding(BaseModel):
     content: str
-    embedding: list[list[float]] | None = None
+    embedding: list[float] | None = None
 
 
 class Embeddings(BaseModel):
@@ -21,10 +22,14 @@ class Embeddings(BaseModel):
 class RAG_Service:
     def __init__(
         self,
+        db,
         rag_settings: RAGSettings = RAGSettings(),
         llm_config: LLM_API_Config = LLM_API_Config(),
         df: pd.DataFrame = None,
     ):
+        if db is None:
+            raise ValueError("Database session cannot be None")
+        self.db = db
         self.rag_settings = rag_settings
         self.llm_service = LLM_Service(llm_api_config=llm_config)
         self.df = df
@@ -44,18 +49,45 @@ class RAG_Service:
                 content=text,
                 embedding=embedding.data[0].embedding,
             )
+
         except Exception as e:
             logger.error(f"Error embedding text: {e}")
             raise e
 
-    async def embed_df(self, df: pd.DataFrame) -> Embeddings:
+    async def save_embedding(self, embedding: Embedding):
         try:
+            if self.db is None:
+                raise ValueError("Database session is not initialized")
+
+            logger.info(f"Saving embedding: {embedding.content[:15]}...")
+            embedding_obj = DB_Embeddings(
+                content=embedding.content,
+                embedding=embedding.embedding,
+            )
+            self.db.add(embedding_obj)
+            self.db.commit()
+            logger.info(f"Saved embedding: {embedding.content[:15]}...")
+        except Exception as e:
+            logger.error(f"Error saving embedding: {e}")
+            if self.db is not None:
+                self.db.rollback()
+            raise e
+
+    async def embed_df(self) -> Embeddings:
+        try:
+            if self.db is None:
+                raise ValueError("Database session is not initialized")
+
             embeddings = []
-            for index, row in df.iterrows():
-                embedding = await self.embed_set(row["content"])
+            for index, row in self.df.iterrows():
+                embedding = await self.embed_set(row["formatted_data"])
                 embeddings.append(embedding)
+                await self.save_embedding(embedding)
+
             self.embeddings = Embeddings(embeddings=embeddings)
             return self.embeddings
         except Exception as e:
+            if self.db is not None:
+                self.db.rollback()
             logger.error(f"Error embedding dataframe: {e}")
             raise e
