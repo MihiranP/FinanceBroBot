@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     openai_api_key: str | None = os.getenv("OPENAI_API_KEY")
     llm_api_base_url: str | None = os.getenv("LLM_API_BASE_URL")
     llm_model_name: str | None = os.getenv("LLM_MODEL_NAME")
+    embedding_model_name: str | None = os.getenv("EMBEDDING_MODEL_NAME")
     llm_api_key: str | None = os.getenv("LLM_API_KEY")
     postgres_db_name: str | None = os.getenv("POSTGRES_DB_NAME")
     postgres_db_user: str | None = os.getenv("POSTGRES_DB_USER")

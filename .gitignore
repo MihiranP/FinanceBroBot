@@ -172,3 +172,5 @@ cython_debug/
 .pypirc
 backend/logs/*
 .vscode/launch.json
+backend/*.csv
+backend/dfs/*
