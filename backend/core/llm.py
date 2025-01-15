@@ -52,8 +52,7 @@ class LLM_Service:
         try:
             logger.debug("Querying LLM with latest message: {}", messages[-1])
             if rag_context is not None:
-                ctx = messages[-1].content
-                messages[-1].content = rag_context + ctx
+                messages.insert(0, Message(role="system", content=rag_context))
             if json_mode:
                 response = await self.llm_api_client.chat.completions.create(
                     model=self.hyperparameters.model,
