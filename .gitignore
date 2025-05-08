@@ -174,3 +174,6 @@ backend/logs/*
 .vscode/launch.json
 backend/*.csv
 backend/dfs/*
+
+# Frontend build files
+frontend/node_modules
