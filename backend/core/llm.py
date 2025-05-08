@@ -43,9 +43,16 @@ class LLM_Service:
     @retry(
         stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=15)
     )
-    async def query(self, messages: list[Message], json_mode: bool = False):
+    async def query(
+        self,
+        messages: list[Message],
+        json_mode: bool = False,
+        rag_context: str | None = None,
+    ):
         try:
             logger.debug("Querying LLM with latest message: {}", messages[-1])
+            if rag_context is not None:
+                messages.insert(0, Message(role="system", content=rag_context))
             if json_mode:
                 response = await self.llm_api_client.chat.completions.create(
                     model=self.hyperparameters.model,
