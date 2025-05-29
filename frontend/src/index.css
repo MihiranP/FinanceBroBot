@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    /* Darker base for cards */
+    --card: 217 50% 12%;
+    --card-foreground: 210 40% 98%;
+
+    /* Slightly different shade for popover */
+    --popover: 220 60% 14%;
+    --popover-foreground: 210 40% 98%;
+
+    /* Vibrant blue for primary actions */
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    /* Darker blue-gray for secondary elements */
+    --secondary: 215 25% 25%;
+    --secondary-foreground: 210 40% 98%;
+
+    /* Subtle background for muted elements */
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    /* Slightly lighter shade for hover states */
+    --accent: 215 30% 20%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    /* Distinct border color */
+    --border: 215 25% 27%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+
+    --radius: 0.5rem;
+
+    /* Custom colors for financial status */
+    --profit: 142.1 70.6% 45.3%;
+    --loss: 0 84.2% 60.2%;
+    --neutral: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Custom gradient backgrounds */
+.bg-card-gradient {
+  background: linear-gradient(
+    to bottom right,
+    hsl(217 50% 12%),
+    hsl(217 50% 8%)
+  );
+}
+
+.bg-audio-gradient {
+  background: linear-gradient(to right, hsl(217 50% 12%), hsl(222 50% 15%));
+}
+
+.bg-sidebar-gradient {
+  background: linear-gradient(to bottom, hsl(220 60% 14%), hsl(220 60% 10%));
+}
